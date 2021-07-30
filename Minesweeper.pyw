@@ -2,7 +2,7 @@ import tkinter as tk
 import time
 import random
 import tkinter.messagebox
-# Minesweeper by Calin Novogreblevschi
+# Minesweeper V1.1 by Calin Novogreblevschi
 def startgame2():
     global sizetitle
     global sizelabel
@@ -10,6 +10,8 @@ def startgame2():
     global minelabel
     global minescale
     global configurebutton
+    global start1
+    start1 = False
     board_y = []
     board = []
     rulex = [-1,0,1,-1,1,-1,0,1]
@@ -19,6 +21,7 @@ def startgame2():
             board_y.append(" ")
         board.append(board_y)
         board_y = []
+    """
     for i in range(mines):      #Generates the coordinates for the mines
         found = False
         while found == False:
@@ -27,6 +30,7 @@ def startgame2():
             if (board[random_x])[random_y] == " ":
                 (board[random_x])[random_y] = "X"
                 found = True
+    
     for x in range(size):
         for y in range(size): #Maps out the numbers around the mines
             if (board[x])[y] == " ":
@@ -39,10 +43,85 @@ def startgame2():
                 if mine_counter == 0:
                     mine_counter = " "
                 (board[x])[y] = str(mine_counter)
+    """
     title = tk.Label(root, text= "Minesweeper", font=("Arial", 20))
     title.pack()
     def left(x,y):
-        if (buttons[x])[y]['text'] != "F":
+        global start1
+        if start1 == True:
+            if (buttons[x])[y]['text'] != "F":
+                found = []
+                (buttons[x])[y].config(state=tk.DISABLED,relief= tk.SUNKEN,activeforeground="red",fg="black",text=(board[x])[y])
+                if (board[x])[y] == " ":
+                    for i in range(0,8):
+                        if (x+(rulex[i]) >= 0) and (y+(ruley[i]) >= 0) and (x+(rulex[i]) <= (size-1)) and (y+(ruley[i]) <= (size-1)):
+                            if (board[x+(rulex[i])])[y+(ruley[i])]  != "X":
+                                if (buttons[x+(rulex[i])])[y+(ruley[i])]['text'] == "F":
+                                    mine_counter = int(mineleft_label['text'][10:-12])
+                                    mine_counter += 1
+                                    mineleft_label.config(text="There are "+str(mine_counter)+" mines left.")
+                                (buttons[x+(rulex[i])])[y+(ruley[i])].config(fg="black",state=tk.DISABLED,relief= tk.SUNKEN,text=str((board[x+(rulex[i])])[y+(ruley[i])]))
+                                if (board[x+(rulex[i])])[y+(ruley[i])]  == " ":
+                                    if (buttons[x+rulex[i]])[y+(ruley[i])]['activeforeground'] != "red":
+                                        found.append([x+(rulex[i]),y+(ruley[i])])
+
+                    for i in range(len(found)):
+                        l = left(found[i][0],found[i][1])
+                elif (board[x])[y] == "X":
+                    #Game lost
+                    for x1 in range(size):
+                        for y1 in range(size):
+                            if (board[x1])[y1] == "X":
+                                if (buttons[x1])[y1]['text'] == "F":
+                                    (buttons[x1])[y1].config(fg="green",text="X")
+                                else:
+                                    (buttons[x1])[y1].config(fg="red",text=str((board[x1])[y1]))
+                    tk.messagebox.showinfo(title="Game lost",message="You lost the game!")
+                    root.destroy()
+                    title = ""
+                    start_button = ""
+                    beginning()
+                else:
+                    win = True
+                    for x1 in range(size): #Checks for win
+                        for y1 in range(size):
+                            if (board[x1])[y1] == "X":
+                                if (buttons[x1])[y1]['text'] != "F":
+                                    win = False
+                            else:
+                                if (buttons[x1])[y1]['state'] == tk.NORMAL:
+                                    win = False
+                    if win == True:
+                        tk.messagebox.showinfo(title="Game won!",message="You won the game!")
+                        root.destroy()
+                        title = ""
+                        start_button = ""
+                        beginning()
+                #if (buttons[x])[y]['text'] != tk.:
+        else:
+            start1 = True
+            for i in range(mines):      #Generates the coordinates for the mines
+                found = False
+                while found == False:
+                    random_x = random.randint(0,size-1)
+                    random_y = random.randint(0,size-1)
+                    if (board[random_x])[random_y] == " ":
+                        if (random_x != x) and (random_y != y):
+                            (board[random_x])[random_y] = "X"
+                            found = True
+    
+            for x1 in range(size):
+                for y1 in range(size): #Maps out the numbers around the mines
+                    if (board[x1])[y1] == " ":
+                        mine_counter = 0
+                        for i in range(0,8):
+                            if (x1+(rulex[i]) >= 0) and (y1+(ruley[i]) >= 0) and (x1+(rulex[i]) <= (size-1)) and (y1+(ruley[i]) <= (size-1)):
+                                if (board[x1+(rulex[i])])[y1+(ruley[i])]  == "X":
+                                    mine_counter += 1
+
+                        if mine_counter == 0:
+                            mine_counter = " "
+                        (board[x1])[y1] = str(mine_counter)
             found = []
             (buttons[x])[y].config(state=tk.DISABLED,relief= tk.SUNKEN,activeforeground="red",fg="black",text=(board[x])[y])
             if (board[x])[y] == " ":
@@ -60,37 +139,6 @@ def startgame2():
 
                 for i in range(len(found)):
                     l = left(found[i][0],found[i][1])
-            elif (board[x])[y] == "X":
-                #Game lost
-                for x1 in range(size):
-                    for y1 in range(size):
-                        if (board[x1])[y1] == "X":
-                            if (buttons[x1])[y1]['text'] == "F":
-                                (buttons[x1])[y1].config(fg="green",text="X")
-                            else:
-                                (buttons[x1])[y1].config(fg="red",text=str((board[x1])[y1]))
-                tk.messagebox.showinfo(title="Game lost",message="You lost the game!")
-                root.destroy()
-                title = ""
-                start_button = ""
-                beginning()
-            else:
-                win = True
-                for x1 in range(size): #Checks for win
-                    for y1 in range(size):
-                        if (board[x1])[y1] == "X":
-                            if (buttons[x1])[y1]['text'] != "F":
-                                win = False
-                        else:
-                            if (buttons[x1])[y1]['state'] == tk.NORMAL:
-                                win = False
-                if win == True:
-                    tk.messagebox.showinfo(title="Game won!",message="You won the game!")
-                    root.destroy()
-                    title = ""
-                    start_button = ""
-                    beginning()
-            #if (buttons[x])[y]['text'] != tk.:
     def right(x,y):
         mine_counter2 = int(mineleft_label['text'][10:-12])
         if (buttons[x])[y]['state'] != tk.DISABLED:
@@ -211,7 +259,7 @@ def beginning():
     global root
     root = tk.Tk()
     root.geometry('800x600')
-    root.title("Minesweeper by Calin Novogreblevschi")
+    root.title("Minesweeper V1.1 by Calin Novogreblevschi")
     #root.state('zoomed')
     root.resizable(0, 0)
     title = tk.Label(root, text= "Minesweeper", font=("Arial", 20))
@@ -226,56 +274,3 @@ beginning()
 root.mainloop()
 
 
-
-"""
-global current_data
-current_data = []
-def Render(x_input,y_input,text_input):
-    #Text Analysis to check for new lines
-    command = [x_input,y_input,text_input]
-    current_data.append(command)
-    text = ""
-    text_output = []
-    for i in range(len(text_input)):
-        if text_input[i] == "\n":
-            text_output.append(text)
-            text= ""
-        else:
-            text = str(text) + text_input[i]
-    text_output.append(text)
-    highest = 0
-    for i in range(len(text_output)):
-        if len(text_output[i])> highest:
-            highest = len(text_output[i])
-    for x in range(x_input+1):
-        for y in range(y_input+(len(text_output))):
-            frame = tk.Frame(master=root,borderwidth=1)
-            frame.grid(row=y,column=x)
-            if y <= y_input:
-                if x_input == x and y_input == y:
-                    label = tk.Label(master=frame, text=text_output[0])
-                    label.pack()
-                else:
-                    required_text = ""
-                    for i in range(highest*2):
-                        required_text = required_text + " "
-                    label = tk.Label(master=frame, text=required_text)
-                    label.pack()
-            else:
-                if x_input == x:
-                    position = y-y_input
-                    label = tk.Label(master=frame, text=text_output[position])
-                    label.pack()
-                else:
-                    required_text = ""
-                    for i in range(highest*2):
-                        required_text = required_text + " "
-                    label = tk.Label(master=frame, text=required_text)
-                    label.pack()
-x = 10
-y = 10
-text = "hello my name is"
-Render(x,y,text)
-
-root.mainloop()
-"""
